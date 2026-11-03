@@ -1,12 +1,15 @@
 import { View, Text, Image, Pressable, StyleSheet } from "react-native";
-import { useState } from "react";
 
 const ARTWORK =
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/";
 
-export default function PokemonCard({ number, name, type }) {
-  const [captured, setCaptured] = useState(false);
-
+export default function PokemonCard({
+  number,
+  name,
+  type,
+  captured,
+  onCapture,
+}) {
   return (
     <View style={[styles.card, captured && styles.cardCaptured]}>
       <Image source={{ uri: `${ARTWORK}${number}.png` }} style={styles.image} />
@@ -17,12 +20,12 @@ export default function PokemonCard({ number, name, type }) {
       </View>
       <Pressable
         style={[styles.button, captured && styles.buttonCaptured]}
-        onPress={() => setCaptured(!captured)}
+        onPress={onCapture}
       >
         <Text
           style={[styles.buttonText, captured && styles.buttonTextCaptured]}
         >
-          {captured ? "Capturé ✓" : "Capturer"}
+          {captured ? "Capturé" : "Capturer"}
         </Text>
       </Pressable>
     </View>
@@ -31,12 +34,10 @@ export default function PokemonCard({ number, name, type }) {
 
 const styles = StyleSheet.create({
   card: {
+    flex: 1,
     backgroundColor: "#ffffff",
     borderRadius: 12,
-    padding: 16,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    flexDirection: "row",
+    padding: 14,
     alignItems: "center",
     elevation: 2,
     shadowColor: "#000000",
@@ -50,37 +51,38 @@ const styles = StyleSheet.create({
     borderColor: "#2563eb",
   },
   image: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     resizeMode: "contain",
   },
   info: {
-    marginLeft: 16,
-    flex: 1,
-    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 8,
   },
   number: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#6b7280",
     fontWeight: "600",
   },
   name: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#111827",
     marginVertical: 2,
+    textAlign: "center",
   },
   type: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#4b5563",
   },
   button: {
+    width: "100%",
     paddingVertical: 8,
-    paddingHorizontal: 14,
     borderRadius: 8,
     borderWidth: 1.5,
     borderColor: "#2563eb",
     backgroundColor: "#ffffff",
+    alignItems: "center",
   },
   buttonCaptured: {
     backgroundColor: "#2563eb",
@@ -89,7 +91,8 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#2563eb",
     fontWeight: "600",
-    fontSize: 14,
+    fontSize: 13,
+    textAlign: "center",
   },
   buttonTextCaptured: {
     color: "#ffffff",

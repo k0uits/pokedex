@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from "react-native";
 
-export default function Titre({ titre }) {
+export default function Titre({ titre, texte }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.texte}>{titre}</Text>
+      <Text style={styles.texte}>{titre || texte}</Text>
     </View>
   );
 }

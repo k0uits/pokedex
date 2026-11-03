@@ -1,54 +1,63 @@
-import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import Titre from "../components/Titre";
+import { View, Text, StyleSheet, Pressable, FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import POKEMONS from "../data/pokemons";
 import PokemonCard from "../components/PokemonCard";
+import Titre from "../components/Titre";
 import Aide from "../components/Aide";
 
-const POKEMONS = [
-  { number: 1, name: "Bulbizarre", type: "Plante" },
-  { number: 4, name: "Salamèche", type: "Feu" },
-  { number: 7, name: "Carapuce", type: "Eau" },
-  { number: 25, name: "Pikachu", type: "Électrik" },
-  { number: 37, name: "Goupix", type: "Feu" },
-  { number: 43, name: "Mystherbe", type: "Plante" },
-];
-
 export default function Index() {
-  const [onlyFire, setOnlyFire] = useState(false);
+  const [captured, setCaptured] = useState([]);
+  const [capturesSeulement, setCapturesSeulement] = useState(false);
 
-  const pokemonsAffiches = onlyFire
-    ? POKEMONS.filter((pokemon) => pokemon.type === "Feu")
+  function toggleCapture(number) {
+    setCaptured((prev) =>
+      prev.includes(number)
+        ? prev.filter((n) => n !== number)
+        : [...prev, number]
+    );
+  }
+
+  const visibles = capturesSeulement
+    ? POKEMONS.filter((p) => captured.includes(p.number))
     : POKEMONS;
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <Titre titre="Mon Pokédex" />
-        <Text style={styles.count}>{POKEMONS.length} Pokémon</Text>
-
-        <Aide />
-
-        <View style={styles.filterContainer}>
-          <Pressable
-            style={styles.filterButton}
-            onPress={() => setOnlyFire(!onlyFire)}
-          >
-            <Text style={styles.filterButtonText}>
-              {onlyFire ? "Tout afficher" : "Seulement le type Feu"}
+      <FlatList
+        data={visibles}
+        extraData={captured}
+        keyExtractor={(item) => String(item.number)}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Titre titre="Mon Pokédex" />
+            <Text style={styles.count}>
+              {POKEMONS.length} Pokémon · {captured.length} capturés
             </Text>
-          </Pressable>
-        </View>
-
-        {pokemonsAffiches.map((pokemon) => (
+            <Aide />
+            <Pressable
+              style={styles.filterButton}
+              onPress={() => setCapturesSeulement(!capturesSeulement)}
+            >
+              <Text style={styles.filterButtonText}>
+                {capturesSeulement ? "Tout afficher" : "Mes captures"}
+              </Text>
+            </Pressable>
+          </View>
+        }
+        renderItem={({ item }) => (
           <PokemonCard
-            key={pokemon.number}
-            number={pokemon.number}
-            name={pokemon.name}
-            type={pokemon.type}
+            number={item.number}
+            name={item.name}
+            type={item.type}
+            captured={captured.includes(item.number)}
+            onCapture={() => toggleCapture(item.number)}
           />
-        ))}
-      </ScrollView>
+        )}
+      />
     </SafeAreaView>
   );
 }
@@ -58,24 +67,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f3f4f6",
   },
-  scroll: {
-    paddingBottom: 24,
+  listContent: {
+    padding: 16,
+    gap: 12,
+  },
+  row: {
+    gap: 12,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 16,
   },
   count: {
     fontSize: 16,
     color: "#6b7280",
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  filterContainer: {
-    alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 8,
   },
   filterButton: {
     backgroundColor: "#111827",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
+    marginTop: 8,
   },
   filterButtonText: {
     color: "#ffffff",
