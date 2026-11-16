@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { View, Text, StyleSheet, Pressable, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import POKEMONS from "../data/pokemons";
-import PokemonCard from "../components/PokemonCard";
-import Titre from "../components/Titre";
-import Aide from "../components/Aide";
+import { useRouter } from "expo-router";
+import POKEMONS from "../../data/pokemons";
+import PokemonCard from "../../components/PokemonCard";
+import Titre from "../../components/Titre";
+import Aide from "../../components/Aide";
 
 export default function Index() {
+  const router = useRouter();
   const [captured, setCaptured] = useState([]);
   const [capturesSeulement, setCapturesSeulement] = useState(false);
 
@@ -49,13 +51,18 @@ export default function Index() {
           </View>
         }
         renderItem={({ item }) => (
-          <PokemonCard
-            number={item.number}
-            name={item.name}
-            type={item.type}
-            captured={captured.includes(item.number)}
-            onCapture={() => toggleCapture(item.number)}
-          />
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => router.push(`/pokemon/${item.number}`)}
+          >
+            <PokemonCard
+              number={item.number}
+              name={item.name}
+              type={item.type}
+              captured={captured.includes(item.number)}
+              onCapture={() => toggleCapture(item.number)}
+            />
+          </Pressable>
         )}
       />
     </SafeAreaView>
