@@ -1,28 +1,52 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, Pressable, FlatList } from "react-native";
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import POKEMONS from "../../data/pokemons";
 import PokemonCard from "../../components/PokemonCard";
 import Titre from "../../components/Titre";
 import Aide from "../../components/Aide";
 
+const API = "https://pokeapi.co/api/v2/pokemon?limit=151";
+
 export default function Index() {
   const router = useRouter();
+  const [pokemons, setPokemons] = useState(null);
   const [captured, setCaptured] = useState([]);
   const [capturesSeulement, setCapturesSeulement] = useState(false);
+
+  async function charger() {
+    const reponse = await fetch(API);
+    const data = await reponse.json();
+    const liste = data.results.map((p, i) => ({ number: i + 1, name: p.name }));
+    setPokemons(liste);
+  }
+
+  useEffect(() => {
+    charger();
+  }, []);
 
   function toggleCapture(number) {
     setCaptured((prev) =>
       prev.includes(number)
         ? prev.filter((n) => n !== number)
-        : [...prev, number]
+        : [...prev, number],
     );
   }
 
+  if (!pokemons) {
+    return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+  }
+
   const visibles = capturesSeulement
-    ? POKEMONS.filter((p) => captured.includes(p.number))
-    : POKEMONS;
+    ? pokemons.filter((p) => captured.includes(p.number))
+    : pokemons;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,7 +61,7 @@ export default function Index() {
           <View style={styles.header}>
             <Titre titre="Mon Pokédex" />
             <Text style={styles.count}>
-              {POKEMONS.length} Pokémon · {captured.length} capturés
+              {pokemons.length} Pokémon · {captured.length} capturés
             </Text>
             <Aide />
             <Pressable
