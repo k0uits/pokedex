@@ -1,6 +1,6 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { useState, useEffect } from "react";
+import { View, Text, Image, StyleSheet, ActivityIndicator } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import POKEMONS from "../../data/pokemons";
 
 const ARTWORK =
   "https://raw.githubusercontent.com/PokeAPI/sprites" +
@@ -8,14 +8,20 @@ const ARTWORK =
 
 export default function FichePokemon() {
   const { number } = useLocalSearchParams();
-  const pokemon = POKEMONS.find((p) => p.number === Number(number));
+  const [pokemon, setPokemon] = useState(null);
+
+  async function charger() {
+    const reponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${number}`);
+    const data = await reponse.json();
+    setPokemon(data);
+  }
+
+  useEffect(() => {
+    charger();
+  }, [number]);
 
   if (!pokemon) {
-    return (
-      <View style={styles.container}>
-        <Text>Pokémon non trouvé</Text>
-      </View>
-    );
+    return <ActivityIndicator size="large" style={{ flex: 1 }} />;
   }
 
   return (
@@ -23,14 +29,24 @@ export default function FichePokemon() {
       <Stack.Screen options={{ title: pokemon.name, headerShown: true }} />
       <View style={styles.imageCard}>
         <Image
-          source={{ uri: `${ARTWORK}${pokemon.number}.png` }}
+          source={{ uri: `${ARTWORK}${number}.png` }}
           style={styles.image}
         />
       </View>
-      <Text style={styles.number}>#{pokemon.number}</Text>
+      <Text style={styles.number}>#{number}</Text>
       <Text style={styles.name}>{pokemon.name}</Text>
       <View style={styles.typeBadge}>
-        <Text style={styles.typeText}>{pokemon.type}</Text>
+        <Text style={styles.typeText}>{pokemon.types[0].type.name}</Text>
+      </View>
+      <View style={styles.detailsRow}>
+        <View style={styles.detailItem}>
+          <Text style={styles.detailLabel}>Taille</Text>
+          <Text style={styles.detailValue}>{pokemon.height / 10} m</Text>
+        </View>
+        <View style={styles.detailItem}>
+          <Text style={styles.detailLabel}>Poids</Text>
+          <Text style={styles.detailValue}>{pokemon.weight / 10} kg</Text>
+        </View>
       </View>
     </View>
   );
@@ -68,16 +84,37 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#111827",
     marginBottom: 12,
+    textTransform: "capitalize",
   },
   typeBadge: {
     backgroundColor: "#e5e7eb",
     paddingVertical: 6,
     paddingHorizontal: 16,
     borderRadius: 16,
+    marginBottom: 20,
   },
   typeText: {
     fontSize: 14,
     color: "#374151",
     fontWeight: "600",
+    textTransform: "capitalize",
+  },
+  detailsRow: {
+    flexDirection: "row",
+    gap: 32,
+    marginTop: 8,
+  },
+  detailItem: {
+    alignItems: "center",
+  },
+  detailLabel: {
+    fontSize: 13,
+    color: "#6b7280",
+    marginBottom: 4,
+  },
+  detailValue: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
   },
 });
